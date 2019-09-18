@@ -7,13 +7,13 @@ import (
 
 func main() {
 	var cf *goboard.CoordinateFactory = new(goboard.CoordinateFactory).Init(19)
-	var c = cf.GetCoordinate(3, 3)
 	var gb = goboard.GetGoBoard(19)
-	gb.Set(c)
-	gb.Set(cf.GetCoordinate(0, 0))
-	gb.Set(cf.GetCoordinate(0, 1))
-	gb.Set(cf.GetCoordinate(18, 18))
-	gb.Set(cf.GetCoordinate(1, 0))
-	fmt.Print(gb.GetData())
 
+	for i := 0; i < 3; i++ {
+		gb.Set(cf.GetCoordinate(0, i))
+		gb.Set(cf.GetCoordinate(1, i))
+	}
+	gb.Set(cf.GetCoordinate(18, 18))
+	gb.Set(cf.GetCoordinate(0, 3))
+	fmt.Print(gb.GetDataJsonStyle())
 }

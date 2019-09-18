@@ -2,6 +2,7 @@ package goboard
 
 import (
 	"container/list"
+	"encoding/json"
 	"errors"
 	"github.com/emirpasic/gods/sets/hashset"
 	"goutil"
@@ -18,6 +19,7 @@ type GoBoard interface {
 	Set(coordinate Coordinate)
 	GoBack()
 	GetData() [][]int
+	GetDataJsonStyle() string
 	GetColor(coordinate Coordinate) int
 	Take(set *hashset.Set)
 }
@@ -72,6 +74,11 @@ func (gb *GoBoardImpl) GoBack() {
 
 func (gb *GoBoardImpl) GetData() [][]int {
 	return gb.Data.Back().Value.([][]int)
+}
+
+func (gb *GoBoardImpl) GetDataJsonStyle() string {
+	data, _ := json.Marshal(gb.GetData())
+	return string(data)
 }
 
 func (gb *GoBoardImpl) GetColor(coordinate Coordinate) int {
