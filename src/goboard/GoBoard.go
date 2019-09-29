@@ -4,7 +4,6 @@ import (
 	"container/list"
 	"encoding/json"
 	"errors"
-	"github.com/emirpasic/gods/sets/hashset"
 	"goutil"
 )
 
@@ -21,7 +20,7 @@ type GoBoard interface {
 	GetData() [][]int
 	GetDataJsonStyle() string
 	GetColor(coordinate Coordinate) int
-	Take(set *hashset.Set)
+	Take(set *goutil.Set)
 }
 
 func (gb *GoBoardImpl) Init(size int) {
@@ -40,31 +39,31 @@ func (gb *GoBoardImpl) Set(coordinate Coordinate) {
 	var newValue = goutil.CopyMatrix(value)
 	newValue[coordinate.Get()[0]][coordinate.Get()[1]] = gb.color
 	gb.Data.PushBack(newValue)
-	var flag bool = false
+	gb.color = -gb.color
+	//验证提子,气
+	var taked bool = false
 	for _, around := range coordinate.AllAround() {
-		if gb.GetColor(around) == -gb.color {
-			var checked = hashset.New()
-			if gb.CheckLiberty(around, -gb.color, checked) == 0 {
-				gb.Take(checked)
-				flag = true
-			}
-		} else if gb.GetColor(around) == 0 {
-			flag = true
+		liberty, checked := gb.CheckSelfLiberty(around)
+		if liberty == 0 {
+			gb.Take(checked)
+			taked = true
 		}
 	}
-	if !flag {
-		if gb.CheckLiberty(coordinate, gb.color, hashset.New()) <= 1 {
-			panic(errors.New("自杀着!"))
+	if !taked {
+		if a, _ := gb.CheckSelfLiberty(coordinate); a == 0 {
+			gb.GoBack()
+			panic(errors.New("自杀着"))
 		}
 	}
 
+	//验证劫,全局同形
 	for prev := gb.Data.Back().Prev(); prev != nil; prev = prev.Prev() {
 		if goutil.Equal(gb.Data.Back().Value.([][]int), prev.Value.([][]int)) {
 			gb.GoBack()
 			panic(errors.New("全局同形"))
 		}
 	}
-	gb.color = -gb.color
+
 }
 
 func (gb *GoBoardImpl) GoBack() {
@@ -88,27 +87,40 @@ func (gb *GoBoardImpl) GetColor(coordinate Coordinate) int {
 	return gb.Data.Back().Value.([][]int)[coordinate.Get()[0]][coordinate.Get()[1]]
 }
 
-func (gb *GoBoardImpl) CheckLiberty(coordinate Coordinate, color int, checked *hashset.Set) int {
-	var libertySet = hashset.New()
-	return gb.checkLiberty(coordinate, color, libertySet, checked)
-}
-
-func (gb *GoBoardImpl) checkLiberty(coordinate Coordinate, color int, libertySet *hashset.Set, checked *hashset.Set) int {
-	var allAround = coordinate.AllAround()
-	if checked.Contains(coordinate) {
-		return libertySet.Size()
+func (gb *GoBoardImpl) CheckSelfLiberty(coordinate Coordinate) (int, *goutil.Set) {
+	if gb.GetColor(coordinate) == 0 {
+		return -1, nil
 	}
-	checked.Add(coordinate)
-	for _, around := range allAround {
-		if gb.GetColor(around) == 0 {
-			libertySet.Add(around)
-		} else if gb.GetColor(around) == color {
-			gb.checkLiberty(around, color, libertySet, checked)
+
+	check := goutil.NewSet()
+	libertySet := goutil.NewSet()
+	gb.mass(coordinate, check)
+	for _, i := range check.Values() {
+		for _, around := range i.(Coordinate).AllAround() {
+			if gb.GetColor(around) == 0 {
+				libertySet.Add(around)
+			}
 		}
 	}
-	return libertySet.Size()
+	return libertySet.Size(), check
 }
-func (gb *GoBoardImpl) Take(set *hashset.Set) {
+
+func (gb *GoBoardImpl) mass(coordinate Coordinate, set *goutil.Set) {
+	color := gb.GetColor(coordinate)
+	if color != 1 && color != -1 {
+		return
+	}
+	if !set.Contains(coordinate) {
+		set.Add(coordinate)
+		for _, i := range coordinate.AllAround() {
+			if gb.GetColor(i) == color {
+				gb.mass(i, set)
+			}
+		}
+	}
+}
+
+func (gb *GoBoardImpl) Take(set *goutil.Set) {
 	var values = set.Values()
 	for _, value := range values {
 		gb.take(value.(Coordinate))

@@ -18,7 +18,8 @@ type Coordinate interface {
 	West() Coordinate
 	East() Coordinate
 	IsOutOfBoard() bool
-	AllAround() []Coordinate
+	AllAround() [4]Coordinate
+	Hash() int
 }
 
 func (coordinate *CoordinateImpl) Set(x int, y int) {
@@ -84,8 +85,8 @@ func (coordinate *CoordinateImpl) West() Coordinate {
 	return west
 }
 
-func (coordinate *CoordinateImpl) AllAround() []Coordinate {
-	var x []Coordinate = make([]Coordinate, 4)
+func (coordinate *CoordinateImpl) AllAround() [4]Coordinate {
+	var x [4]Coordinate = [4]Coordinate{}
 	x[0] = coordinate.North()
 	x[1] = coordinate.East()
 	x[2] = coordinate.South()
@@ -95,6 +96,10 @@ func (coordinate *CoordinateImpl) AllAround() []Coordinate {
 
 func (coordinate *CoordinateImpl) IsOutOfBoard() bool {
 	return coordinate.x < 0 // x ==-1,y==-1
+}
+
+func (coordinate *CoordinateImpl) Hash() int {
+	return coordinate.Get()[0]*19 + coordinate.Get()[1]
 }
 
 type CoordinateFactory struct {
