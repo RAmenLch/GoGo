@@ -29,20 +29,42 @@
             cxt.lineTo(space*size- (space-edge),i*space- (space-edge));
             cxt.stroke();
         }
+        if (size == 19){
+            cxt.beginPath();
+            cxt.arc(3*space+edge,3*space+edge,space/7,0,Math.PI*2,true);
+            cxt.closePath();
+            cxt.fill();
+            cxt.beginPath();
+            cxt.arc(3*space+edge,15*space+edge,space/7,0,Math.PI*2,true);
+            cxt.closePath();
+            cxt.fill();
+            cxt.beginPath();
+            cxt.arc(15*space+edge,3*space+edge,space/7,0,Math.PI*2,true);
+            cxt.closePath();
+            cxt.fill();
+            cxt.beginPath();
+            cxt.arc(15*space+edge,15*space+edge,space/7,0,Math.PI*2,true);
+            cxt.closePath();
+            cxt.fill();
+            cxt.beginPath();
+            cxt.arc(9*space+edge,9*space+edge,space/10,0,Math.PI*2,true);
+            cxt.closePath();
+            cxt.fill();
+            cxt.beginPath();
+        }
     }
     function write_go(data,cxt) {
         for(i = 0;i < 19 ;i++){
             for(j = 0; j < 19; j++){
                 if(data[i][j] === 1){
-                    console.debug(i.toString() + j.toString())
-                    cxt.fillStyle = "#000";
+                    cxt.fillStyle = "#FFF";
                     cxt.beginPath();
                     cxt.arc(i*space+edge,j*space+edge,space/2,0,Math.PI*2,true);
                     cxt.closePath();
                     cxt.fill()
                 }
                 if (data[i][j] === -1){
-                    cxt.fillStyle="#FFF";
+                    cxt.fillStyle="#000";
                     cxt.beginPath();
                     cxt.arc(i*space+edge,j*space+edge,space/2,0,Math.PI*2,true);
                     cxt.closePath();
@@ -72,6 +94,9 @@
         let y = event.layerY - edge;
         let xx = parseInt(x/space+0.5);
         let yy = parseInt(y/space+0.5);
+        if(xx >= size || xx < 0 || yy >= size || yy < 0){
+            return
+        }
         $.post(url,{
             x:xx,
             y:yy
@@ -85,40 +110,3 @@
 
 </script>
 
-<script>
-    function write_board(ctx) {
-        cxt.fillStyle="#d87c0b";
-        cxt.fillRect(0,0,space*(size+1)- (space-edge)*2,space*(size+1)- (space-edge)*2);
-        for(let i = 1; i <= size;i++){
-            cxt.fillStyle="#000";
-            cxt.moveTo(i*space - (space-edge),space - (space-edge));
-            cxt.lineTo(i*space- (space-edge),space*size- (space-edge));
-            cxt.stroke();
-            cxt.moveTo(space- (space-edge),i*space- (space-edge));
-            cxt.lineTo(space*size- (space-edge),i*space- (space-edge));
-            cxt.stroke();
-        }
-    }
-    function write_go(data,cxt) {
-        for(i = 0;i < 19 ;i++){
-            for(j = 0; j < 19; j++){
-                if(data[i][j] === 1){
-                    console.debug(i.toString() + j.toString())
-                    cxt.fillStyle = "#000";
-                    cxt.beginPath();
-                    cxt.arc(i*space+edge,j*space+edge,space/2,0,Math.PI*2,true);
-                    cxt.closePath();
-                    cxt.fill()
-                }
-                if (data[i][j] === -1){
-                    cxt.fillStyle="#FFF";
-                    cxt.beginPath();
-                    cxt.arc(i*space+edge,j*space+edge,space/2,0,Math.PI*2,true);
-                    cxt.closePath();
-                    cxt.fill()
-                }
-            }
-        }
-    }
-
-</script>

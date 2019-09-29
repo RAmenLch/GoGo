@@ -25,11 +25,20 @@ func Equal(a [][]int, b [][]int) bool {
 			return false
 		}
 	}
-	for i := range a {
-		for j := range a {
-			if a[i][j] != b[i][j] {
-				return false
-			}
+
+	hashA := 0
+	hashB := 0
+	for i := 0; i < len(a); i++ {
+		step := uint(0)
+		hashA = 0
+		hashB = 0
+		for j := 0; j < len(a[i]); j++ {
+			hashA += (a[i][j] + 1) << step
+			hashB += (b[i][j] + 1) << step
+			step += 2
+		}
+		if hashA != hashB {
+			return false
 		}
 	}
 	return true

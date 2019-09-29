@@ -33,6 +33,5 @@ func (c *GoBoardController) Post() {
 	}()
 	gb.Set(cd)
 	c.Data["data"] = gb.GetDataJsonStyle()
-	fmt.Print(gb.GetDataJsonStyle())
 	c.TplName = "api.html"
 }
