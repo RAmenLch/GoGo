@@ -7,9 +7,9 @@
 
 <body>
     <div style="width: 800px; height: 800px; margin: 30px auto;">
-        <canvas id="can" height="800px" width="800px">
-
+        <canvas id="can">
         </canvas>
+        <button type="button" id="goBack">悔棋</button>
     </div>
 </body>
 </html>
@@ -22,11 +22,14 @@
         cxt.fillRect(0,0,space*(size+1)- (space-edge)*2,space*(size+1)- (space-edge)*2);
         for(let i = 1; i <= size;i++){
             cxt.fillStyle="#000";
+            cxt.beginPath()
             cxt.moveTo(i*space - (space-edge),space - (space-edge));
             cxt.lineTo(i*space- (space-edge),space*size- (space-edge));
             cxt.stroke();
             cxt.moveTo(space- (space-edge),i*space- (space-edge));
             cxt.lineTo(space*size- (space-edge),i*space- (space-edge));
+            cxt.closePath();
+            ctx.strokeStyle="#000";
             cxt.stroke();
         }
         if (size == 19){
@@ -50,20 +53,19 @@
             cxt.arc(9*space+edge,9*space+edge,space/10,0,Math.PI*2,true);
             cxt.closePath();
             cxt.fill();
-            cxt.beginPath();
         }
     }
     function write_go(data,cxt) {
         for(i = 0;i < 19 ;i++){
             for(j = 0; j < 19; j++){
-                if(data[i][j] === 1){
+                if(data[i][j] == 1){
                     cxt.fillStyle = "#FFF";
                     cxt.beginPath();
                     cxt.arc(i*space+edge,j*space+edge,space/2,0,Math.PI*2,true);
                     cxt.closePath();
                     cxt.fill()
                 }
-                if (data[i][j] === -1){
+                if (data[i][j] == -1){
                     cxt.fillStyle="#000";
                     cxt.beginPath();
                     cxt.arc(i*space+edge,j*space+edge,space/2,0,Math.PI*2,true);
@@ -80,10 +82,12 @@
     const edge = 20;
     const size = 19;
     let c=document.getElementById("can");
+    c.width = space*(size+1)- (space-edge)*2;
+    c.height = space*(size+1)- (space-edge)*2;
     let cxt=c.getContext("2d");
     write_board(cxt);
-    url = "http://localhost:6060/go";
-    $.get(url,function (data) {
+    _url = "http://localhost:6060/go";
+    $.get(_url,function (data) {
         console.log(data);
         let godata = JSON.parse(data);
         write_go(godata["data"],cxt)
@@ -97,7 +101,7 @@
         if(xx >= size || xx < 0 || yy >= size || yy < 0){
             return
         }
-        $.post(url,{
+        $.post(_url,{
             x:xx,
             y:yy
         },function (data) {
@@ -105,6 +109,22 @@
             let godata = JSON.parse(data);
             write_board(cxt);
             write_go(godata["data"],cxt)
+        });
+    },false);
+    document.getElementById("goBack").addEventListener('click',function (event) {
+        $.ajax({
+            type: 'DELETE',
+            url: _url,
+            data: {},
+            success: function(data){
+                console.log(data);
+                let godata = JSON.parse(data);
+                write_board(cxt);
+                write_go(godata["data"],cxt)
+            },
+            error: function(data){
+
+            }
         });
     },false)
 

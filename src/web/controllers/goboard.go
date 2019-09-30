@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"github.com/astaxie/beego"
 	_ "github.com/astaxie/beego/cache/redis"
 	_ "github.com/gomodule/redigo/redis"
@@ -18,7 +17,6 @@ func (c *GoBoardController) Get() {
 	gb = goboard.GetGoBoard(19)
 	c.Data["data"] = gb.GetDataJsonStyle()
 	c.TplName = "api.html"
-	fmt.Print(gb.GetDataJsonStyle())
 }
 
 func (c *GoBoardController) Post() {
@@ -32,6 +30,12 @@ func (c *GoBoardController) Post() {
 		c.TplName = "api.html"
 	}()
 	gb.Set(cd)
+	c.Data["data"] = gb.GetDataJsonStyle()
+	c.TplName = "api.html"
+}
+
+func (c *GoBoardController) Delete() {
+	gb.GoBack()
 	c.Data["data"] = gb.GetDataJsonStyle()
 	c.TplName = "api.html"
 }

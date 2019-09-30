@@ -28,11 +28,11 @@ func (gb *GoBoardImpl) Init(size int) {
 	var value [][]int = goutil.MakeIntMatrix([2]int{size, size})
 	gb.Data = list.New()
 	gb.Data.PushBack(value)
-	gb.color = -1
+	gb.color = BLACK
 }
 
 func (gb *GoBoardImpl) Set(coordinate Coordinate) {
-	if gb.GetColor(coordinate) != 0 {
+	if gb.GetColor(coordinate) != BLANK {
 		panic(errors.New("已有子!"))
 	}
 	var value = (gb.Data.Back()).Value.([][]int)
@@ -43,14 +43,18 @@ func (gb *GoBoardImpl) Set(coordinate Coordinate) {
 	//验证提子,气
 	var taked bool = false
 	for _, around := range coordinate.AllAround() {
-		liberty, checked := gb.CheckSelfLiberty(around)
-		if liberty == 0 {
-			gb.Take(checked)
-			taked = true
+		z := gb.GetColor(around)
+		if z == gb.color {
+			liberty, checked := gb.CheckSelfLiberty(around)
+			if liberty == 0 {
+				gb.Take(checked)
+				taked = true
+			}
 		}
 	}
 	if !taked {
-		if a, _ := gb.CheckSelfLiberty(coordinate); a == 0 {
+		a, _ := gb.CheckSelfLiberty(coordinate)
+		if a == 0 {
 			gb.GoBack()
 			panic(errors.New("自杀着"))
 		}
@@ -67,12 +71,16 @@ func (gb *GoBoardImpl) Set(coordinate Coordinate) {
 }
 
 func (gb *GoBoardImpl) GoBack() {
+	if gb.Data.Len() <= 1 {
+		return
+	}
 	gb.Data.Remove(gb.Data.Back())
 	gb.color = -gb.color
 }
 
 func (gb *GoBoardImpl) GetData() [][]int {
-	return gb.Data.Back().Value.([][]int)
+	//深拷贝
+	return goutil.CopyMatrix(gb.Data.Back().Value.([][]int))
 }
 
 func (gb *GoBoardImpl) GetDataJsonStyle() string {
@@ -82,13 +90,13 @@ func (gb *GoBoardImpl) GetDataJsonStyle() string {
 
 func (gb *GoBoardImpl) GetColor(coordinate Coordinate) int {
 	if coordinate.IsOutOfBoard() {
-		return -2
+		return EDGE
 	}
 	return gb.Data.Back().Value.([][]int)[coordinate.Get()[0]][coordinate.Get()[1]]
 }
 
 func (gb *GoBoardImpl) CheckSelfLiberty(coordinate Coordinate) (int, *goutil.Set) {
-	if gb.GetColor(coordinate) == 0 {
+	if gb.GetColor(coordinate) == BLANK || gb.GetColor(coordinate) == EDGE {
 		return -1, nil
 	}
 
@@ -97,7 +105,7 @@ func (gb *GoBoardImpl) CheckSelfLiberty(coordinate Coordinate) (int, *goutil.Set
 	gb.mass(coordinate, check)
 	for _, i := range check.Values() {
 		for _, around := range i.(Coordinate).AllAround() {
-			if gb.GetColor(around) == 0 {
+			if gb.GetColor(around) == BLANK {
 				libertySet.Add(around)
 			}
 		}
@@ -107,7 +115,7 @@ func (gb *GoBoardImpl) CheckSelfLiberty(coordinate Coordinate) (int, *goutil.Set
 
 func (gb *GoBoardImpl) mass(coordinate Coordinate, set *goutil.Set) {
 	color := gb.GetColor(coordinate)
-	if color != 1 && color != -1 {
+	if color != WHITE && color != BLACK {
 		return
 	}
 	if !set.Contains(coordinate) {

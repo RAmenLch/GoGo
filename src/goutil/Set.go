@@ -38,3 +38,12 @@ func (s *Set) Values() []interface{} {
 	}
 	return values
 }
+
+func (s *Set) Hash() int {
+	hash := 0
+	for key, _ := range s.items {
+		keyR := key % (1 << 8)
+		hash = (hash << uint(5)) - hash + keyR
+	}
+	return hash
+}

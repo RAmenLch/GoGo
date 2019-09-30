@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"goboard"
 )
 
@@ -21,6 +20,4 @@ func main() {
 	gb.Set(cf.GetCoordinate(1, 1))
 	gb.Set(cf.GetCoordinate(18, 18))
 	gb.Set(cf.GetCoordinate(2, 0))
-	fmt.Print(gb.GetDataJsonStyle())
-
 }
